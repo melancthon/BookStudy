@@ -1,0 +1,34 @@
+<%
+Widget('layout', Model, 1, true, false,
+	function(section) {
+		switch (section) {
+			case 'head':
+				%>
+				<script type="text/javascript">
+				var Model = <%Print(JSON.stringify(Model));%>;
+				$(document).ready(function() {
+					$('.add-book').click(function() {
+						var book = { name: 'On Beauty', image:'Johnathan_Edwards_On_Beauty.jpg', desc:'Short description of the book is right here.' };
+						$.post('/book/add', {book: book}, function(data) {
+							Model.books[data.id] = data;
+							CommonUtil.refreshWidget('booksgrid', Model, 1);
+						} );
+					});					
+				});
+				</script>
+				<%
+				break;
+		
+			case 'main':
+				%>
+				<a href="#" class="btn add-book">+</a>
+				<%
+				Widget('booksgrid', Model, 1);
+				break;
+
+			case 'tabs':
+				Widget('tabs', Model, 1);
+				break;		
+	}
+});
+%>

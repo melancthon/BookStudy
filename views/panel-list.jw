@@ -1,0 +1,38 @@
+<div class="well widget-panel-list-<%WidgetID();%>">
+	<ul class="media-list">
+	  <li class="media">
+	    <div class="media-body">
+	      	<h4 class="media-heading panel-head"><%Print(Model.label);%></h4>
+	      	<a href="#" class="btn add-<%Print(Model.id);%>">+</a>
+
+	      	<%
+			var hasItems = Model.list.length > 0;
+	      	if (hasItems) {%>
+	      	<a href="#" id="newer-<%WidgetID();%>">newer</a>
+	   		<ul class="media-list panel-items">
+				<%for(var i=0; i<Model.list.length; ++i) {
+					var item = Model.list[i];
+				%>
+				<li class="media">
+				    <a class="pull-left" href="#">
+				      <img class="media-object" src="<%Print(item.image);%>">
+				    </a>
+				    <div class="media-body">
+				      <h5 class="media-heading"><%Print(item.title);%></h5>
+				      <small>Last reply: <%Print((new Date(item.editDate)).format('D M d Y g:i a'));%></small>
+				    </div>
+				</li>
+				<%}%>
+			</ul>			
+	    	<a href="#" id="older-<%WidgetID();%>">older</a>	
+			<%}else{%>
+			<div class="panel-items">
+				<p>
+					<small>Nothing has ever been posted.</small>
+				</p>
+			</div>
+			<%}%>
+	    </div>
+	  </li>
+	</ul>
+</div>

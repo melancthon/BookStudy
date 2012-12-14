@@ -1,0 +1,17 @@
+<div class="comments widget-comments-<%WidgetID();%>">
+	<h1>Discussion <%Print(Model.discussionID);%> is here about some topic people should discuss</h1>
+	<%for(var i=0; i<50; ++i) {%>
+		<div class="comment-container">
+			<div class="comment-left">
+				<img src="img/avatar.png" border="0" />
+			</div>
+			<div class="comment">
+				<div class="comment-author">Some Dude</div>
+				<p>Lorem ipsum dolor sit ametd sit amet sent et dm,n tom</p>
+				<%if (i % 2 == 0) {%>
+				<p>Lorem ipsum dolor sit ametd sit amet sent et dm,n tom</p>
+				<%}%>
+			</div>
+		</div>
+	<%}%>
+</div>

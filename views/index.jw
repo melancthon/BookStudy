@@ -1,0 +1,65 @@
+<%
+Widget('layout', Model, 1, true, false,
+	function(section) {
+		switch (section) {
+			case 'head':
+				%>
+				<script type="text/javascript">
+				var Model = <%Print(JSON.stringify(Model));%>;
+				$(document).ready(function() {
+					$('div.discussion a').live('click', function() {
+						var div = $(this).parent();
+						var id = div.attr('id').replace('discussion-' ,'');
+						Model.selectedDiscussionID = id;						
+						CommonUtil.refreshWidget('discussions', Model, 1);
+						$.get('/Comments', { discussionID: id }, function (data) {
+							CommonUtil.refreshWidget('comments', data, 1);
+						});
+					});
+					
+					$('.add-discussion').click(function() {
+						var discussion = {title: 'Discussion added'};
+						Model.discussions.push(discussion);
+						CommonUtil.refreshWidget('discussions', Model, 1);
+						$.post('/discussion/add', {discussion: discussion} );
+					});
+				});
+				</script>
+				<%
+				break;
+		
+			case 'main':
+				Widget('comments', Model, 1);
+				break;
+				
+			case 'side-top':
+				%>
+					<div class="books">
+						<div class="book-anchor"></div>
+						<%
+						var bi = 0;
+						var selBI = 5;
+						for(var b in Model.books) {
+							var book = Model.books[b];							
+						%>
+						<%if(bi!=selBI){%><a href="#null"><%}%>
+							<div title="<%Print(book.name.replace(/\"/g, "&quot;"));%>" class="book<%if(bi==selBI){%> selected<%}%>">
+								<%if(bi==selBI){%><%Print(book.name);%><%}%>
+							</div>
+						<%if(bi!=selBI){%></a><%}%>
+						<%
+							++bi;
+						}%>
+					</div>
+					<div>
+						<a href="#" class="add-discussion">add</a>
+					</div>
+				<%
+				break;
+				
+			case 'side':
+				Widget('discussions', Model, 1);	
+				break;
+	}
+});
+%>

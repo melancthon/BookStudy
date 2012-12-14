@@ -1,0 +1,9 @@
+<div class="discussion-container widget-discussions-<%WidgetID();%>">
+	<%for(var i=0; i<Model.discussions.length; ++i) {
+		var discussion = Model.discussions[i];
+	%>
+		<div class="discussion <%if (i == Model.selectedDiscussionID) {%>selected<%}%>" id="discussion-<%Print(i);%>">
+		<a href="#null"><%Print(discussion.title);%></a>
+		</div>
+	<%}%>
+</div>

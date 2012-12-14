@@ -1,0 +1,48 @@
+
+.command-line
+{
+	position: fixed;
+	bottom: 0px;
+	height: 300px;
+	background: #fff;
+	border-top: 1px solid #aaa;
+}
+
+.command-line-show {
+	width: 785px;
+	padding: 5px;
+	background: #aac5d9;
+}
+
+.command-output {
+	height: 250px;
+	border: 1px solid #ccc;
+	overflow: auto;
+	background: #fff;
+}
+
+.command-line input, .command-output {
+	background: #3e5b70;
+	color: #ddd;
+}
+
+.command-line input {
+	width: 782px;
+}
+
+.command-output {
+	width: 784px;
+}
+
+.command-output .command {
+	font-weight: bold;
+	border:none;
+}
+
+.command-line.command-hide {
+	height: 20px;
+}
+
+.command-line.command-hide div {
+	display:none;
+}

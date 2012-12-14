@@ -1,0 +1,20 @@
+<ul class="thumbnails widget-booksgrid-<%WidgetID();%>">
+<%
+for(var b in Model.books) {
+	var book = Model.books[b];
+	%><li class="span3">
+		<div class="thumbnail">			
+			<%if (book.image) {%>
+				<div>
+					<a href="/book/index/<%Print(b);%>"><img src="/img/<%Print(book.image);%>"></a>
+				</div>
+			<%}%>
+				<h3><%Print(book.name);%></h3>
+				<%if (book.desc) {%>		
+					<p><%Print(book.desc);%></p>
+				<%}%>
+		</div>
+	  </li><%
+}			
+%>
+</ul>
