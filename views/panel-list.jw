@@ -8,12 +8,12 @@
 	      	<%
 			var hasItems = Model.list.length > 0;
 	      	if (hasItems) {%>
-	      	<a href="#" id="newer-<%WidgetID();%>">newer</a>
+            <div><a href="#" id="newer-<%WidgetID();%>">newer</a></div>
 	   		<ul class="media-list panel-items">
 				<%for(var i=0; i<Model.list.length; ++i) {
-					var item = Model.list[i];
-				%>
+					var item = Model.list[i];%>
 				<li class="media">
+                    <%Print(item.id);%><br/>
 				    <a class="pull-left" href="#">
 				      <img class="media-object" src="<%Print(item.image);%>">
 				    </a>
@@ -23,12 +23,12 @@
 				    </div>
 				</li>
 				<%}%>
-			</ul>			
-	    	<a href="#" id="older-<%WidgetID();%>">older</a>	
+			</ul>
+            <div><a href="#" id="older-<%WidgetID();%>">older</a></div>				
 			<%}else{%>
 			<div class="panel-items">
 				<p>
-					<small>Nothing has ever been posted.</small>
+					<small>Nothing here.</small>
 				</p>
 			</div>
 			<%}%>

@@ -11,8 +11,11 @@ var express = require('express')
   , spawn = require('child_process').spawn
   , events = require('events')
   , uuid = require('node-uuid')
-  , data = buckets.buckets;  
+  , closure = require('nclosure').nclosure()
 
+  goog.require('goog.structs.AvlTree');
+  goog.require('goog.structs.Queue');
+  
 var app = express();
 
 app.locals.db = 
@@ -55,9 +58,9 @@ app.locals.commands = {
 			var m = app.locals.methods;
 			var db = app.locals.db;
 			var indexes	= app.locals.indexes;
-			params.discussion.id = db.discussions.nextID++;
-			params.discussion.createDate = params.createDate;
-			params.discussion.editDate = params.discussion.createDate;
+			params.discussion.id = db.discussions.nextID++;            
+            params.discussion.createDate = params.createDate;
+			params.discussion.editDate = params.createDate;
 			var idS = params.discussion.id+'';
 			db.discussions.discussions[idS] = params.discussion;
 			
@@ -135,25 +138,94 @@ app.locals.methods = {
 		return books;
 	},
 
-	getBookDiscussions: function(params) {
-		var m = app.locals.methods;
+    getListOfThings: function(params) {
+                
+    	var m = app.locals.methods;
 		var db = app.locals.db
 		var i = app.locals.indexes;
-		var book = db.books.books[params.id];
-		var discussions = [];
-		if (book) {
-			var num = 0;
-			if (!params.beforeDiscussionID && !params.afterDiscussionID) {
-				i.discussionsByLastEditDate[book.id].forEach(
-					function(elem){
-						++num;
-						if (num > 5)
-							return false;
-						discussions.push(m.shallow(elem));
-					});
-			}
-		}
-		return discussions;
+        
+        if (!params.numToGet)
+            params.numToGet = 5;
+        var newest = null;
+        var oldest = null;
+        var list = [];
+        if (params.index) {
+            var num = 0;
+            var startNode = null;
+            if (params.newest) {
+                startNode = params.newest;                          
+                if (startNode) {     
+                    var rList = [];
+                    params.index.reverseOrderTraverse(
+                    function(elem) {
+        				++num;
+    					if (num > params.numToGet+1)
+    						return false;
+                        if (num > 1)
+    					    rList.push(m.shallow(elem));
+    				}, startNode);          
+                    for(var i = rList.length-1; i>=0; --i) {
+                        list.push(rList[i]);
+                    }                      
+                }
+            }
+            
+            if (!startNode) {
+                if (params.oldest)  {
+                    startNode = params.oldest;                  
+                    if (startNode) {
+                		params.index.inOrderTraverse(
+                        function(elem){
+                        	++num;
+                        	if (num > params.numToGet+1)
+                        		return false;
+                            if (num > 1)
+                        	    list.push(m.shallow(elem));
+                        }, startNode);
+                    }
+                }
+            }
+            
+            if (!startNode) {                    
+                params.index.inOrderTraverse(
+                function(elem){
+                    ++num;
+                	if (num > params.numToGet)
+                		return false;
+                	list.push(m.shallow(elem));
+                });
+            }
+                        
+            if (list.length > 0) {
+                newest = {};
+                oldest = {}
+                for(var i in params.itemNames)
+                {
+                    var itemName= params.itemNames[i];   
+                    newest[itemName] = list[0][itemName];
+                    oldest[itemName] = list[list.length-1][itemName];
+                }
+            }
+            else if (params.newest) {                
+                newest = oldest = params.newest;
+            }
+            else if (params.oldest) {     
+                newest = oldest = params.oldest;            
+            }            
+        }
+        var ret = {newest: newest, oldest: oldest};
+        ret[params.listName] = list;
+    	return ret;
+        
+    },
+
+	getBookDiscussions: function(params) {
+    	var m = app.locals.methods;
+    	var i = app.locals.indexes;
+    	var db = app.locals.db;
+    	var book = db.books.books[params.id];
+        return m.getListOfThings({index: i.discussionsByLastEditDate[book.id], 
+            newest: params.newest, oldest: params.oldest, itemNames: ['id', 'editDate'], listName: 'discussions'});
 	},
 
 	shallow: function(obj) {
@@ -196,9 +268,14 @@ app.locals.methods = {
 		var i = app.locals.indexes;
 		if (!i.discussionsByLastEditDate)
 			i.discussionsByLastEditDate = {};
-		i.discussionsByLastEditDate[params.book.id] = new data.BSTree(function(a,b){
+		i.discussionsByLastEditDate[params.book.id] = 
+            new goog.structs.AvlTree(function(a,b) {
+              return m.compareDescending(a,b,['editDate', 'id'])
+            });
+        
+        /*new data.BSTree(function(a,b){
 			return m.compareDescending(a,b,['editDate', 'id'])
-		});
+		});*/
 	},
 
 	compare: function(a, b, compareFields) {
@@ -361,6 +438,7 @@ app.locals.methods = {
 			app.locals.logCommand = function() { };
 		
 			var m = app.locals.methods;
+    		var c = app.locals.commands;
 			if (typeof(params) == 'undefined')
 				params = {};
 			if (typeof(params.logIndex) == 'undefined') {

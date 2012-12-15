@@ -66,7 +66,7 @@ exports.book = function(req,res)
 
 exports.addBook = function(req, res) {
 	var c = req.app.locals.commands;	
-	req.body.book.cdate = new Date();
+	req.body.book.cdate = (new Date()).toUTCString();
 	c.addBook({book: req.body.book}, function(data) { res.json(data); });	
 };
 
@@ -77,7 +77,7 @@ exports.comments = function(req, res){
 
 exports.addDiscussion = function(req, res) {
 	var c = req.app.locals.commands;
-	c.addDiscussion({discussion: req.body.discussion, bookID: req.body.bookID, createDate: new Date()}, 
+	c.addDiscussion({discussion: req.body.discussion, bookID: req.body.bookID, createDate: (new Date()).toUTCString()}, 
 		function(data) { res.json(data); });	
 };
 
@@ -86,8 +86,9 @@ exports.moreDiscussions = function(req, res) {
 	m.query(req,
 		function() {
 			return { discussions: m.getBookDiscussions({id: req.query.bookID, 
-				beforeDiscussionID: req.query.beforeDiscussionID, 
-				afterDiscussionID: req.query.afterDiscussionID}) };
+				newest: req.query.newest, 
+				oldest: req.query.oldest
+            }) };
 		},
 		function(data) {
 			res.json(data);

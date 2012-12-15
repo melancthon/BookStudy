@@ -2,7 +2,7 @@
 Widget('layout', Model, 1, true, false,
 	function(section) {
 
-	    var discussModel = {label:'Recent Discussions', list: Model.discussions, id: 'discussions'};
+	    var discussModel = {label:'Recent Discussions', list: Model.discussions.discussions, id: 'discussions'};
 		var guideModel = {label:'Recent Guides', list: Model.guides, id: 'guides'};
 		var blogModel = {label:'Recent Blogs', list: Model.blogs, id: 'blogs'};
 
@@ -11,7 +11,7 @@ Widget('layout', Model, 1, true, false,
 				%>
 				<script type="text/javascript">
 				var Model = <%Print(JSON.stringify(Model));%>;
-				var discussModel = {label:'Recent Discussions', list: Model.discussions, id: 'discussions'};
+				var discussModel = {label:'Recent Discussions', list: Model.discussions.discussions, id: 'discussions'};
 				var guideModel = {label:'Recent Guides', list: Model.guides, id: 'guides'};
 				var blogModel = {label:'Recent Blogs', list: Model.blogs, id: 'blogs'};				
 				$(document).ready(function() {
@@ -19,42 +19,38 @@ Widget('layout', Model, 1, true, false,
 						var item = {image:'http://placehold.it/32x32', title:'What do think about the way Edwards portrays ...', desc:'Some description of the thing we are discussing and such and so on'};
 						$.post('/discussion/add', {discussion: item, bookID: Model.book.id, rnd: Math.random()}, function(data) {	
 							if (Model.discussions.length == 0)
-								Model.discussions.push(data);
+								Model.discussions.push(data.discussions);
 							else
-								Model.discussions.splice(0,0, data);
+								Model.discussions.splice(0,0, data.discussions);
 							CommonUtil.refreshWidget('panel-list', discussModel, 1);
 						} );
 						return false;
 					});
 
 					$('#older-1').live('click', function() {	
-						var lastDiscussionID = null;
-						if (Model.discussions.length > 0)					
-							lastDiscussionID = Model.discussions[Model.discussions.length-1].id;
 						$.get('/discussion/more', {bookID: Model.book.id, 
-							beforeDiscussionID: lastDiscussionID, rnd: Math.random()}, 
-							function(data) {
-								discussModel.list = Model.discussions = data.discussions;
-								CommonUtil.refreshWidget('panel-list', discussModel, 1);
-							}
+							oldest: Model.discussions.oldest, rnd: Math.random()}, 
+							receiveDiscussions
 						);
 						return false;
 					});
 
 					$('#newer-1').live('click', function() {	
-						var firstDiscussionID = null;
-						if (Model.discussions.length > 0)					
-							firstDiscussionID = Model.discussions[0].id;
 						$.get('/discussion/more', {bookID: Model.book.id, 
-							afterDiscussionID: firstDiscussionID, rnd: Math.random()}, 
-							function(data) {
-								discussModel.list = Model.discussions = data.discussions;
-								CommonUtil.refreshWidget('panel-list', discussModel, 1);
-							}
+							newest: Model.discussions.newest, rnd: Math.random()}, 
+							receiveDiscussions
 						);
 						return false;
 					});					
 				});
+
+                function receiveDiscussions(data) {
+                    if (data.discussions.discussions.length != 0) {
+                        Model.discussions = data.discussions;
+						discussModel.list = data.discussions.discussions;
+						CommonUtil.refreshWidget('panel-list', discussModel, 1);
+                    }
+                }
 				</script>
 				<%
 				break;
