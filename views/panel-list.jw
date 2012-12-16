@@ -12,14 +12,20 @@
 	   		<ul class="media-list panel-items">
 				<%for(var i=0; i<Model.list.length; ++i) {
 					var item = Model.list[i];%>
-				<li class="media">
-                    <%Print(item.id);%><br/>
+				<li class="media">                    
 				    <a class="pull-left" href="#">
 				      <img class="media-object" src="<%Print(item.image);%>">
 				    </a>
 				    <div class="media-body">
-				      <h5 class="media-heading"><%Print(item.title);%></h5>
-				      <small>Last reply: <%Print((new Date(item.editDate)).format('D M d Y g:i a'));%></small>
+				      <h5 class="media-heading">
+                        <a href="/book/discussions/<%Print(Model.parentID);%>/<%Print(item.id);%>">
+                            <%Print(item.title);%>
+                        </a>
+                      </h5>
+                      <%if(item.user) {%>
+                      <div>posted by <%Print(item.user.firstName + ' ' + item.user.lastName);%></div>
+                       <%}%>
+				      <small>last reply: <%Print((new Date(item.editDate)).format('D M d Y g:i a'));%></small>
 				    </div>
 				</li>
 				<%}%>

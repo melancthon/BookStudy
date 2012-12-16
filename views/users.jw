@@ -1,0 +1,39 @@
+<%
+Widget('layout', Model, 1, true, false,
+    function(section) {
+		switch (section) {
+			case 'head':
+				%>
+				<script type="text/javascript">
+				var Model = <%Print(JSON.stringify(Model));%>;
+                $('.add-user').live('click', function() {
+                    var user = {
+                        email: $('.email-0').val(),
+                        firstName: $('.firstName-0').val(),
+                        lastName: $('.lastName-0').val(),
+                        password: $('.password-0').val()
+                    };
+                    $.post('/manage/addUser', {user: user}, function(data) {  
+                        if (data.added.error) {
+                            console.log(data.added.error);
+                        }
+                        else {
+                            Model.users = data.users;
+						    CommonUtil.refreshWidget('userlist', Model.users, 1);
+                        }
+                    });
+                });
+				</script>
+				<%
+				break;
+		
+			case 'main':
+				Widget('userlist', Model.users, 1);
+				break;
+
+			case 'tabs':
+				Widget('tabs', Model, 1);
+				break;		
+	}
+});
+%>

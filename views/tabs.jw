@@ -1,5 +1,5 @@
 <ul class="nav nav-tabs">
-<%for (var t=0; t<Model.tabs.length; ++t) {
+<%for (var t in Model.tabs) {
 	%>
 	<li <%if (t == Model.selectedTab) {%>class="active"<%}%>>
 		<a href="<%Print(Model.tabs[t].link);%>"><%Print(Model.tabs[t].name);%></a>

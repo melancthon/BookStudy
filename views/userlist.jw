@@ -1,0 +1,29 @@
+<div class="widget-userlist-<%WidgetID();%>">
+<table class="table table-condensed">
+    <tr>
+        <th></th>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Password</th>
+    </tr>
+    <tr>
+        <td><a href="#" class="add-user btn">Add</a></td>
+        <td><input class="input-medium email-0" type="text" placeholder="Email" /></td>
+        <td><input class="input-medium firstName-0" type="text" placeholder="First Name" /></td>
+        <td><input class="input-medium lastName-0" type="text" placeholder="Last Name"/></td>
+        <td><input class="input-medium password-0" type="text" placeholder="Password" /></td>
+    </tr>
+    <%for(var u=0; u<Model.users.length; ++u) {
+        var user = Model.users[u];
+    %>
+        <tr>
+            <td></td>
+            <td><input class="input-medium" type="text" value="<%Print(user.email.replace('"', '&quot;'));%>"  placeholder="Email" /></td>
+            <td><input class="input-medium"  type="text" value="<%Print(user.firstName.replace('"', '&quot;'));%>" placeholder="First Name"  /></td>
+            <td><input class="input-medium"  type="text" value="<%Print(user.lastName.replace('"', '&quot;'));%>" placeholder="Last Name" /></td>
+            <td>****</td>
+        </tr>
+    <%}%>
+</table>
+</div>

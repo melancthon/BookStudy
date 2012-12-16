@@ -1,7 +1,0 @@
-<div class="widget-test2-<%WidgetID();%>">
-<ul>
-<%for(var i=0; i<Model.test.length; ++i) {%>
-	<li>'<%Print(Model.test[i]);%>'</li>
-<%}%>
-</ul>
-</div> 

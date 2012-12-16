@@ -3,7 +3,7 @@
 		var discussion = Model.discussions[i];
 	%>
 		<div class="discussion <%if (i == Model.selectedDiscussionID) {%>selected<%}%>" id="discussion-<%Print(i);%>">
-		<a href="#null"><%Print(discussion.title);%></a>
+		<a href="/book/discussion/<%Print(discussion.bookID);%>"><%Print(discussion.title);%></a>
 		</div>
 	<%}%>
 </div>

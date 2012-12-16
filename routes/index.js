@@ -37,7 +37,7 @@ exports.books = function(req,res) {
 	var m = req.app.locals.methods;
 	m.query(req,
 		function() {
-			return { books: m.getBooks(), tabs: m.getTabs(), selectedTab: 1 };
+			return { books: m.getBooks(), tabs: m.getTabs(req), selectedTab: 'books' };
 		},
 		function(data) {
 			res.send(m.getWidgetHtml('books', data, 1));
@@ -56,7 +56,7 @@ exports.book = function(req,res)
 				discussions: m.getBookDiscussions({id: req.params.id}), 
 				guides: {}, 
 				blogs: {'1': {image:'http://placehold.it/32x32', title:'A blog about stuff', desc:'Some description of the thing we are discussing and such and so on'}},
-				tabs: m.getTabs() };
+				tabs: m.getTabs(req) };
 		},
 		function(data) {
 			res.send(m.getWidgetHtml('book', data, 1));
@@ -77,7 +77,8 @@ exports.comments = function(req, res){
 
 exports.addDiscussion = function(req, res) {
 	var c = req.app.locals.commands;
-	c.addDiscussion({discussion: req.body.discussion, bookID: req.body.bookID, createDate: (new Date()).toUTCString()}, 
+	c.addDiscussion({discussion: req.body.discussion, bookID: req.body.bookID, createDate: (new Date()).toUTCString(),
+        userID: req.session.email}, 
 		function(data) { res.json(data); });	
 };
 
@@ -92,6 +93,23 @@ exports.moreDiscussions = function(req, res) {
 		},
 		function(data) {
 			res.json(data);
+		}
+	);
+};
+
+exports.bookDiscussion = function(req, res) {
+    var m = req.app.locals.methods;
+    m.query(req,
+    	function() {
+            var book = m.getBook({id:req.params.id});
+            console.log(req.params);
+            console.log(req.query);
+			var discussion = m.getDiscussion({id: req.params.discussionID});
+			return { discussion: discussion, book: book,
+				tabs: m.getTabs(req) };
+		},
+		function(data) {
+			res.send(m.getWidgetHtml('bookDiscussion', data, 1));
 		}
 	);
 };

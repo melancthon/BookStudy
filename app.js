@@ -2,7 +2,7 @@
 var express = require('express')
   , routes = require('./routes')
   , login = require('./routes/login')
-  , user = require('./routes/user')
+  , manage = require('./routes/admin/manage')
   , http = require('http')
   , path = require('path')
   , command = require('./routes/admin/command')
@@ -22,7 +22,7 @@ app.locals.db =
 { 
 	title: 'Book Study', 
 	users: { 
-		'melancthon@gmail.com': { password: 'test', rights: { fullControl: {} } }
+		'melancthon@gmail.com': { password: 'test', firstName: 'Some', lastName: 'Person', rights: { manage: {}, command: {} } }
 	},
 	books: {nextID: 1, books: {}},
 	discussions: {nextID: 1, discussions: {}},
@@ -61,9 +61,9 @@ app.locals.commands = {
 			params.discussion.id = db.discussions.nextID++;            
             params.discussion.createDate = params.createDate;
 			params.discussion.editDate = params.createDate;
+            params.discussion.userID = params.userID;
 			var idS = params.discussion.id+'';
-			db.discussions.discussions[idS] = params.discussion;
-			
+			db.discussions.discussions[idS] = params.discussion;			
 			if (typeof(params.bookID) !== 'undefined') {
 				var book = db.books.books[params.bookID];
 				if (typeof(book.discussions) === 'undefined')
@@ -84,6 +84,26 @@ app.locals.commands = {
 
 			return db.books.books[params.book.id+''];
 		},
+    addUser:
+        function(params) {
+    		var db = app.locals.db;
+            var ret = {};
+            if (!params.user.email || params.user.email.trim() === '')
+            {            
+                ret.error = { email: 'Required' };
+            }
+            else if (db.users[params.user.email]) {
+                ret.error = { email: 'User with that email already exists' };
+            }
+            else {
+			    db.users[params.user.email] = params.user;
+                ret.user = params.user;
+                ret.user.rights = {};
+            }
+
+			return ret;
+              
+        },
 	easyLog: 
 		function() {
 			console.log('easy');
@@ -137,6 +157,24 @@ app.locals.methods = {
 		}
 		return books;
 	},
+    
+    getDiscussion: function(params) {
+    	var m = app.locals.methods;
+		var db = app.locals.db;
+		var discussion = m.shallow(db.discussions.discussions[params.id]);
+		return discussion;        
+    },
+    
+    getDiscussionComments: function(params) {
+        var m = app.locals.methods;
+    	var db = app.locals.db;
+		var discussion = m.shallow(db.discussions.discussions[params.id]);
+        function commentRecurse() {
+            return {};
+        }
+        var comments = commentRecurse();            
+        return comments;
+    },
 
     getListOfThings: function(params) {
                 
@@ -224,9 +262,35 @@ app.locals.methods = {
     	var i = app.locals.indexes;
     	var db = app.locals.db;
     	var book = db.books.books[params.id];
-        return m.getListOfThings({index: i.discussionsByLastEditDate[book.id], 
+        var discussions = m.getListOfThings({index: i.discussionsByLastEditDate[book.id], 
             newest: params.newest, oldest: params.oldest, itemNames: ['id', 'editDate'], listName: 'discussions'});
+        for(var d in discussions.discussions) {
+            var discussion = discussions.discussions[d];
+            if (discussion.userID) 
+                discussion.user = db.users[discussion.userID];            
+        }
+        return discussions;
 	},
+    
+    getUsers: function(params) {
+        var m = app.locals.methods;
+    	var db = app.locals.db;
+    	var users = [];
+        for(var u in db.users) {
+            var user = m.shallow(db.users[u]);
+            console.log(user);
+            user.email = u;
+            users.push(user);
+        }
+        users.sort(function(a,b){
+            if (a.email < b.email)
+                return -1;
+            else if (a.email > b.email)
+                return 1;
+            return 0;
+        });
+        return { users: users };        
+    },
 
 	shallow: function(obj) {
 		var copy = {};
@@ -529,8 +593,18 @@ app.locals.methods = {
 			});				
 		},
 	getTabs:
-		function() {
-			return [{name:'Feed', link:''}, {name: 'Books', link:'/book/list'}, {name: 'Blogs', link:'/blogs'}];
+		function(req) {
+    		var db = app.locals.db;
+			var tabs = {
+                feed: {name:'Feed', link:''}, 
+                books: {name: 'Books', link:'/book/list'}, 
+                blogs: {name: 'Blogs', link:'/blogs'}            
+            };
+            if (db.users[req.session.email].rights.manage)
+            {
+                tabs.users = {name:'Users', link: '/manage/users'};
+            }
+            return tabs;
 		}
 }	
 
@@ -638,26 +712,25 @@ app.all('*', function(req, res, next) {
 	next();
 });
 
-// some gets
-app.get('/', routes.index);
-app.get('/index', routes.index);
+// some gets and posts
+app.get('/', routes.books);
+app.get('/index', routes.books);
 app.get('/book/list', routes.books);
-
 app.get('/login', login.index);
 app.get('/logout', login.logout);
 app.post('/login/post', login.login);
-
-app.get('/users', user.index);
-app.get('/user/:id', user.one);
-
 app.get('/comments', routes.comments);
 app.post('/discussion/add', routes.addDiscussion);
 app.get('/discussion/more', routes.moreDiscussions);
 app.post('/book/add', routes.addBook);
 app.get('/book/index/:id', routes.book);
+app.get('/book/discussions/:id/:discussionID', routes.bookDiscussion)
 
 // admin 
 app.post('/admin/command/post', command.postCommand);
 app.get('/admin/command/history', command.commandHistory);
+app.get('/manage', manage.users);
+app.get('/manage/users', manage.users);
+app.post('/manage/addUser', manage.addUser);
 
 app.locals.methods.startApp();

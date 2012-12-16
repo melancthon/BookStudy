@@ -1,0 +1,32 @@
+<%
+Widget('layout', Model, 1, true, false,
+    function(section) {
+		switch (section) {
+			case 'head':
+				%>
+				<script type="text/javascript">
+				var Model = <%Print(JSON.stringify(Model));%>;
+				
+				</script>
+				<%
+				break;
+		
+			case 'main':
+				%>
+				<div class="row-fluid">
+      		    	<div class="span4">
+                        <%Widget('book-info', Model.book, 1);%>
+				    </div>				    
+				  	<div class="span4">
+				    	
+                    </div>
+  				</div>
+				<%
+				break;
+
+			case 'tabs':
+				Widget('tabs', Model, 1);
+				break;		
+	}
+});
+%>

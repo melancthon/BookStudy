@@ -152,8 +152,7 @@ var CommonUtil = (function ( ) {
 		
 				widgets.instances[instanceID] = model;
 				$('.widget-'+widgetName+'-'+ widgetID).fadeOut('fast', function() {
-					var newHtml = $(CommonUtil.getWidgetHtml(widgetName, widgets.instances[instanceID], widgetID, false, false)).hide();
-							console.log(newHtml);
+					var newHtml = $(CommonUtil.getWidgetHtml(widgetName, widgets.instances[instanceID], widgetID, false, false)).hide();					
 					$('.widget-'+widgetName+'-'+ widgetID).replaceWith(newHtml);
 					
 					$('.widget-'+widgetName+'-'+ widgetID).fadeIn('fast', function() {		
